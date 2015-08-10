@@ -123,8 +123,12 @@
 
                 </div>
             </div>
-            <div class="col-md-6" style="background-color:lightgrey;">
-                <h2>Games ({{ games.length }}) <span class="pull-right">In Game {{ playersInGame }}</span></h2>
+            <div class="col-md-4" style="background-color:#ccc;">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Games ({{ games.length }}) <span class="pull-right">In Game {{ playersInGame }}</span></h2>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-3">Duration</div>
                     <div class="col-md-3">Players</div>
@@ -140,33 +144,35 @@
                     <div class="col-md-2">{{ game.max_rr }}</div>
                 </div>
             </div>
-            <div class="col-md-6" style="background-color:lightgrey;">
+            <div class="col-md-4" style="background-color:#ddd;">
                 <h2>Lobby ({{ waitingList.length }})</h2>
                 <div class="row">
-                    <div class="col-md-4">Email</div>
-                    <div class="col-md-1">Level</div>
+                    <div class="col-md-3">Name</div>
+                    <div class="col-md-2">Level</div>
                     <div class="col-md-2">RR</div>
                     <div class="col-md-3">Type</div>
                     <div class="col-md-2">Wait</div>
                 </div>
                 <div class="row" ng-repeat="player in waitingList">
-                    <div class="col-md-4">{{ player.name }}</div>
-                    <div class="col-md-1">{{ player.level }}</div>
+                    <div class="col-md-3">{{ player.name }}</div>
+                    <div class="col-md-2">{{ player.level }}</div>
                     <div class="col-md-2">{{ player.rr }}</div>
                     <div class="col-md-3">{{ player.type }} ({{ player.flyer ? 'F' : 'G' }})</div>
                     <div class="col-md-2">{{ player.wait }}</div>
                 </div>
+            </div>
+            <div class="col-md-4" style="background-color:#ccc;">
                 <h2>Queue ({{ players.length }}) <span class="pull-right">Max Wait {{ avgWait }}</span></h2>
                 <div class="row">
-                    <div class="col-md-4">Email</div>
-                    <div class="col-md-1">Level</div>
+                    <div class="col-md-3">Name</div>
+                    <div class="col-md-2">Level</div>
                     <div class="col-md-2">RR</div>
                     <div class="col-md-3">Type</div>
                     <div class="col-md-2">Wait</div>
                 </div>
                 <div class="row" ng-repeat="player in players">
-                    <div class="col-md-4">{{ player.name }}</div>
-                    <div class="col-md-1">{{ player.level }}</div>
+                    <div class="col-md-3">{{ player.name }}</div>
+                    <div class="col-md-2">{{ player.level }}</div>
                     <div class="col-md-2">{{ player.rr }}</div>
                     <div class="col-md-3">{{ player.type }} {{ player.flyer ? 'F' : 'G' }}</div>
                     <div class="col-md-2">{{ player.wait }}</div>

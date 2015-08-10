@@ -27,7 +27,7 @@ function generatePlayer() {
 	}
 
 	players.push({
-		name: chance.email(),
+		name: chance.twitter(),
 		rr: rr,
 		type: type,
 		flyer: flyer,
