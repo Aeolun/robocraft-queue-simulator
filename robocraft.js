@@ -84,7 +84,7 @@ while(canDo) {\n\
 		console.log(newplayers);\n\
 		newplayers.sort(function(a, b) {\n\
 			if (a.rr > b.rr) return -1;\n\
-			if (a.rr < b.rr) return -1;\n\
+			if (a.rr < b.rr) return 1;\n\
 			return 0;\n\
 		});\n\
 		var teams = {\n\
