@@ -64,12 +64,18 @@ while(canDo) {\n\
 	playersInGame = 16;\n\
 	while (canDo == false) {\n\
 		startAt = 0;\n\
+		order = 1;\n\
 		while (canDo == false) {\n\
-			if (queue.length > startAt + playersInGame - 1 && queue[startAt + playersInGame - 1].rr > queue[startAt].rr / (2+queue[startAt].wait/60)) {\n\
+			if (order = 1 && queue.length - startAt - playersInGame + 1 > 0 && queue[queue.length - startAt - playersInGame].rr < queue[queue.length - startAt - 1].rr * (2+queue[queue.length - startAt - 1].wait/60)) {\n\
+				canDo = true;\n\
+				startAt = queue.length - startAt - playersInGame;\n\
+				break;\n\
+			} else if ( order = -1 && queue.length > startAt + playersInGame - 1 && queue[startAt + playersInGame - 1].rr > queue[startAt].rr / (2+queue[startAt].wait/60)) {\n\
 				canDo = true;\n\
 				break;\n\
 			} else {\n\
 				startAt++;\n\
+				order *= -1;\n\
 				if (startAt + playersInGame - 1 >= queue.length) break;\n\
 			}\n\
 		}\n\
