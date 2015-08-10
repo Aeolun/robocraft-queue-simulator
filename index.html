@@ -1,0 +1,178 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="editor/ace.js"></script>
+    <script src="chance.js"></script>
+    <script src="robocraft.js"></script>
+
+    <style>
+        .activeGame {
+            width:1000px;
+            height:500px;
+            border:1px solid black;
+            margin:0 auto;
+            position:fixed;
+            margin-left:-500px;
+            margin-top:-250px;
+            top:50%;
+            left:50%;
+            background-color:white;
+            z-index:100000;
+            padding:10px;
+        }
+        .game-row {
+            cursor:pointer;
+        }
+        .game-row:hover {
+            background-color:#ffd;
+        }
+        a {
+            cursor:pointer;
+        }
+        .ace_editor {
+            height:350px;
+        }
+    </style>
+</head>
+<body ng-app="roboApp">
+    <div class="container">
+        <h1>Robocraft Matchmaking Test</h1>
+        <div class="row" ng-controller="queueCtrl">
+            <div class="activeGame" ng-if="activeGame != null">
+                <h1>{{ activeGame.id }} <a class="pull-right" ng-click="setActiveGame(null)">Close</a></h1>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2>Team A</h2>
+                        <div class="row">
+                            <div class="col-md-4">Email</div>
+                            <div class="col-md-1">Level</div>
+                            <div class="col-md-2">RR</div>
+                            <div class="col-md-3">Type</div>
+                            <div class="col-md-2">Wait</div>
+                        </div>
+                        <div class="row" ng-repeat="player in activeGame.teamA">
+                            <div class="col-md-4">{{ player.name }}</div>
+                            <div class="col-md-1">{{ player.level }}</div>
+                            <div class="col-md-2">{{ player.rr }}</div>
+                            <div class="col-md-3">{{ player.type }} ({{ player.flyer ? 'F' : 'G' }})</div>
+                            <div class="col-md-2">{{ player.wait }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h2>Team B</h2>
+                        <div class="row">
+                            <div class="col-md-4">Email</div>
+                            <div class="col-md-1">Level</div>
+                            <div class="col-md-2">RR</div>
+                            <div class="col-md-3">Type</div>
+                            <div class="col-md-2">Wait</div>
+                        </div>
+                        <div class="row" ng-repeat="player in activeGame.teamB">
+                            <div class="col-md-4">{{ player.name }}</div>
+                            <div class="col-md-1">{{ player.level }}</div>
+                            <div class="col-md-2">{{ player.rr }}</div>
+                            <div class="col-md-3">{{ player.type }} ({{ player.flyer ? 'F' : 'G' }})</div>
+                            <div class="col-md-2">{{ player.wait }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12" style="background-color:lightgrey;">
+                <div class="col-md-4">
+                <h2>Params</h2>
+                <table class="table">
+                    <tr>
+                        <td>Average Duration</td>
+                        <td><input type="number" ng-model="params.avg_duration" /></td>
+                    </tr>
+                    <tr>
+                        <td>Return Chance</td>
+                        <td><input type="number" step="0.01" ng-model="params.return_chance" /></td>
+                    </tr>
+                    <tr>
+                        <td>New Chance</td>
+                        <td><input type="number" step="0.01" ng-model="params.new_chance" /></td>
+                    </tr>
+                    <tr>
+                        <td>Leave Chance</td>
+                        <td><input type="number" step="0.01" ng-model="params.leave_chance" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <small>After a game ends, users arrive in the lobby, from where they may leave the game, or return to the queue to play another game. The `Return` and `Leave` variables control what a user does. If a user does nothing they'll remain in the lobby for that step. The `New` variable controls how much chance there is on each step that a new user appears in the queue (an entirely new one, that was never there before).</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input type="button" value="Start" ng-click="start()" />
+                            <input type="button" value="Stop" ng-click="stop()" />
+                            <input type="button" value="Step" ng-click="step()" />
+                        </td>
+                    </tr>
+                </table>
+                </div>
+                <div class="col-md-8">
+                    <h2>Matchmaking Function</h2>
+                    <textarea id="editor" rows="14" class="form-control" ng-model="queueFunction" style="height:300px;">
+                    </textarea>
+                    <div>
+                        You need two things here: <code>queue</code>, which is an array that contains all the users that are currently waiting for a game. And the function <code>startGame(teamA, teamB)</code> which takes two arrays of user objects (e.g. entries in the queue variable). You can call <code>startGame</code> multiple times per step.
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-6" style="background-color:lightgrey;">
+                <h2>Games ({{ games.length }}) <span class="pull-right">In Game {{ playersInGame }}</span></h2>
+                <div class="row">
+                    <div class="col-md-3">Duration</div>
+                    <div class="col-md-3">Players</div>
+                    <div class="col-md-2">Min</div>
+                    <div class="col-md-2">Avg</div>
+                    <div class="col-md-2">Max</div>
+                </div>
+                <div class="row game-row" ng-repeat="game in games" ng-click="setActiveGame(game)">
+                    <div class="col-md-3">{{ game.duration }} / {{ game.max_duration }}</div>
+                    <div class="col-md-3">{{ game.players }}</div>
+                    <div class="col-md-2">{{ game.min_rr }}</div>
+                    <div class="col-md-2">{{ game.average_rr }}</div>
+                    <div class="col-md-2">{{ game.max_rr }}</div>
+                </div>
+            </div>
+            <div class="col-md-6" style="background-color:lightgrey;">
+                <h2>Lobby ({{ waitingList.length }})</h2>
+                <div class="row">
+                    <div class="col-md-4">Email</div>
+                    <div class="col-md-1">Level</div>
+                    <div class="col-md-2">RR</div>
+                    <div class="col-md-3">Type</div>
+                    <div class="col-md-2">Wait</div>
+                </div>
+                <div class="row" ng-repeat="player in waitingList">
+                    <div class="col-md-4">{{ player.name }}</div>
+                    <div class="col-md-1">{{ player.level }}</div>
+                    <div class="col-md-2">{{ player.rr }}</div>
+                    <div class="col-md-3">{{ player.type }} ({{ player.flyer ? 'F' : 'G' }})</div>
+                    <div class="col-md-2">{{ player.wait }}</div>
+                </div>
+                <h2>Queue ({{ players.length }}) <span class="pull-right">Max Wait {{ avgWait }}</span></h2>
+                <div class="row">
+                    <div class="col-md-4">Email</div>
+                    <div class="col-md-1">Level</div>
+                    <div class="col-md-2">RR</div>
+                    <div class="col-md-3">Type</div>
+                    <div class="col-md-2">Wait</div>
+                </div>
+                <div class="row" ng-repeat="player in players">
+                    <div class="col-md-4">{{ player.name }}</div>
+                    <div class="col-md-1">{{ player.level }}</div>
+                    <div class="col-md-2">{{ player.rr }}</div>
+                    <div class="col-md-3">{{ player.type }} {{ player.flyer ? 'F' : 'G' }}</div>
+                    <div class="col-md-2">{{ player.wait }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
